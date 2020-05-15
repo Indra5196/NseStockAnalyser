@@ -17,7 +17,7 @@ def opt_chain_analysis(stock_code):
         deriv_type = "equities"
     url = "https://www.nseindia.com/api/option-chain-" + deriv_type + "?symbol=" + stock_code
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36'
+        'User-Agent': 'Chrome/81.0.4044.138'
     }
 
 
