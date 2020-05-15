@@ -1,6 +1,7 @@
 import requests
 import json
 from nsetools import Nse
+from pprint import pprint
 
 
 def opt_chain_analysis(stock_code):
@@ -26,8 +27,11 @@ def opt_chain_analysis(stock_code):
 
     max_ce_oi, max_pe_oi, max_pain_oi, strk_price_max_ce, strk_price_max_pe, strk_price_max_pain = 0, 0, 0, 0, 0, 0
     for val in ce_pe:
-        ce_oi = val['CE']['openInterest']
-        pe_oi = val['PE']['openInterest']
+        try:
+            ce_oi = val['CE']['openInterest']
+            pe_oi = val['PE']['openInterest']
+        except KeyError:
+            continue
 
         mp = ce_oi + pe_oi
 
