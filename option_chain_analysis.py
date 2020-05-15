@@ -4,7 +4,7 @@ from nsetools import Nse
 from pprint import pprint
 
 
-def opt_chain_analysis(stock_code):
+def opt_chain_analysis(stock_code, data_points):
     nse = Nse()
     try:
         lot_size = nse.get_fno_lot_sizes()[stock_code]
@@ -25,7 +25,8 @@ def opt_chain_analysis(stock_code):
     data_json = requests.get(url, headers=headers).json()
     ce_pe = data_json['filtered']['data']
 
-    max_ce_oi, max_pe_oi, max_pain_oi, strk_price_max_ce, strk_price_max_pe, strk_price_max_pain = 0, 0, 0, 0, 0, 0
+    ce_strk_dict, pe_strk_dict, max_pain_dict = {}, {}, {}
+
     for val in ce_pe:
         try:
             ce_oi = val['CE']['openInterest']
@@ -35,21 +36,28 @@ def opt_chain_analysis(stock_code):
 
         mp = ce_oi + pe_oi
 
-        if ce_oi > max_ce_oi:
-            max_ce_oi = ce_oi
-            strk_price_max_ce = val['strikePrice']
+        ce_strk_dict.update({val['strikePrice'] : ce_oi})
+        pe_strk_dict.update({val['strikePrice']: pe_oi})
+        max_pain_dict.update({val['strikePrice']: ce_oi + pe_oi})
 
-        if pe_oi > max_pe_oi:
-            max_pe_oi = pe_oi
-            strk_price_max_pe = val['strikePrice']
+    ce_strk_dict = sorted(ce_strk_dict.items(), key=lambda item: item[1], reverse=True)
+    pe_strk_dict = sorted(pe_strk_dict.items(), key=lambda item: item[1], reverse=True)
+    max_pain_dict = sorted(max_pain_dict.items(), key=lambda item: item[1], reverse=True)
 
-        if mp > max_pain_oi:
-            max_pain_oi = mp
-            strk_price_max_pain = val['strikePrice']
 
-    print(f'Max Put:- OI = {max_pe_oi * lot_size} : Strike Price = {strk_price_max_pe}')
-    print(f'Max Call:- OI = {max_ce_oi * lot_size} : Strike Price = {strk_price_max_ce}')
-    print(f'Max Pain:- OI = {max_pain_oi * lot_size} : Strike Price = {strk_price_max_pain}')
+    for i in range(0, data_points):
+        print (f'Call Point {i + 1} :- Strike Price = {ce_strk_dict[i][0]} : OI = {ce_strk_dict[i][1] * lot_size}')
+
+    print('==========================================================================')
+
+    for i in range(0, data_points):
+        print (f'Put Point {i + 1} :- Strike Price = {pe_strk_dict[i][0]} : OI = {pe_strk_dict[i][1] * lot_size}')
+
+    print('==========================================================================')
+
+    for i in range(0, data_points):
+        print (f'Max Pain Point {i + 1} :- Strike Price = {max_pain_dict[i][0]} : OI = {max_pain_dict[i][1] * lot_size}')
 
 code = input("Enter Stock Code : ")
-opt_chain_analysis(code.upper())
+data_points = input("How many data points you want per category? : ")
+opt_chain_analysis(code.upper(), int(data_points))
