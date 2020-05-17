@@ -1,55 +1,156 @@
 import requests
 import json
 from nsetools import Nse
-from pprint import pprint
+from nsepy import get_history
+import datetime
+from datetime import date
+import matplotlib
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+from dateutil.relativedelta import relativedelta, TH
 
+
+def continuation_handler(original_fn):
+    def wrapper_fn():
+        while (True):
+            try:
+                original_fn()
+            except (ValueError, KeyError):
+                print('Wrong data, or the stock is not traded as derivatives')
+                continue
+
+            while (True):
+                flg = input("\n\rDo you want to know about more stock derivatives?(Y/N) : ").upper()
+                if flg == 'Y' or flg == 'N':
+                    break
+                print('Answer should be either Y(Yes) or N(No)')
+
+            if flg == 'N':
+                return
+
+    return wrapper_fn
+
+
+@continuation_handler
 def opt_chain_wrapper():
-    while (True):
-        code = input("Enter Stock Code : ")
-        data_points = input("How many data points you want per category? : ")
-        ce_strk_dict, pe_strk_dict, max_pain_dict = opt_chain_analysis(code.upper(), int(data_points))
-
-        for i in range(0, data_points):
-            print (f'Call Point {i + 1} :- Strike Price = {ce_strk_dict[i][0]} : OI = {ce_strk_dict[i][1] * lot_size}')
-
-        print('==========================================================================')
-
-        for i in range(0, data_points):
-            print (f'Put Point {i + 1} :- Strike Price = {pe_strk_dict[i][0]} : OI = {pe_strk_dict[i][1] * lot_size}')
-
-        print('==========================================================================')
-
-        for i in range(0, data_points):
-            print (
-                f'Max Pain Point {i + 1} :- Strike Price = {max_pain_dict[i][0]} : OI = {max_pain_dict[i][1] * lot_size}')
+    code = input("Enter Stock Code : ")
+    data_points = int(input("How many data points you want per category? : "))
+    try:
+        ce_strk_dict, pe_strk_dict, max_pain_dict, lot_size = opt_chain_analysis(code.upper(), data_points)
+    except ValueError:
+        raise ValueError
 
 
-        while (True):
-            flg = input("\n\rDo you want to know about more stock derivatives?(Y/N) : ").upper()
-            if flg == 'Y' or flg == 'N':
-                break
-            print('Answer should be either Y(Yes) or N(No)')
+    for i in range(0, data_points):
+        print (f'Call Point {i + 1} :- Strike Price = {ce_strk_dict[i][0]} : OI = {ce_strk_dict[i][1] * lot_size}')
 
-        if flg == 'N':
-            return
+    print('==========================================================================')
+
+    for i in range(0, data_points):
+        print (f'Put Point {i + 1} :- Strike Price = {pe_strk_dict[i][0]} : OI = {pe_strk_dict[i][1] * lot_size}')
+
+    print('==========================================================================')
+
+    for i in range(0, data_points):
+        print (f'Max Pain Point {i + 1} :- Strike Price = {max_pain_dict[i][0]} : OI = {max_pain_dict[i][1] * lot_size}')
 
 
+def open_interest_graphs(stock_code, no_days, strike_price, opt_type):
+    index = False
+    if stock_code == "NIFTY" or stock_code == "NIFTYIT" or stock_code == "BANKNIFTY":
+        index = True
+
+    end_date = date.today()
+    start_date = end_date - datetime.timedelta(days = no_days)
+    expiry_date = end_date + relativedelta(day=31, weekday=TH(-1))  # Last thursday of the month
+
+    if opt_type == "CE" or opt_type == "PE":
+        stock_opt = get_history(symbol=stock_code,
+                                start=start_date,
+                                end=end_date,
+                                option_type=opt_type,
+                                strike_price=strike_price,
+                                expiry_date=expiry_date,
+                                index=index)
+
+        x = list(dict(stock_opt['Open Interest']).keys())
+        y = list(dict(stock_opt['Open Interest']).values())
+
+    elif opt_type == "TOTAL":
+        stock_opt_ce = get_history(symbol=stock_code,
+                                start=start_date,
+                                end=end_date,
+                                option_type="CE",
+                                strike_price=strike_price,
+                                expiry_date=expiry_date)
+
+        stock_opt_pe = get_history(symbol=stock_code,
+                                start=start_date,
+                                end=end_date,
+                                option_type="PE",
+                                strike_price=strike_price,
+                                expiry_date=expiry_date)
+
+        x = list(dict(stock_opt_ce['Open Interest']).keys())
+        a = list(dict(stock_opt_ce['Open Interest']).values())
+        b = list(dict(stock_opt_pe['Open Interest']).values())
+        y = [i + j for i, j in zip(a, b)]
+
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%Y'))
+    plt.gca().xaxis.set_major_locator(mdates.DayLocator())
+    plt.plot(x, y)
+    plt.gcf().autofmt_xdate()
+    plt.xlabel('Date')
+    plt.ylabel('Open Interest')
+
+    plt.title(f'{opt_type} Open Interest variation at strike price of Rs.{strike_price} in the past {no_days} days\n')
+    plt.show()
+
+
+@continuation_handler
 def put_call_wrapper():
-    while (True):
-        code = input("Enter Stock Code : ")
+    code = input("Enter Stock Code : ")
+    try:
         pc_oi, pc_vol = put_call_ratio(code.upper())
+    except ValueError:
+        raise ValueError
 
-        print(f'P/C Ratio (Open Interest) : {pc_oi}')
-        print(f'P/C Ratio (Volume) : {pc_vol}')
+    print(f'P/C Ratio (Open Interest) : {pc_oi}')
+    print(f'P/C Ratio (Volume) : {pc_vol}')
 
-        while (True):
-            flg = input("\n\rDo you want to know about more stock derivatives?(Y/N) : ").upper()
-            if flg == 'Y' or flg == 'N':
+
+@continuation_handler
+def oi_graph_wrapper():
+    try:
+        stock_code = input("Enter Stock Code : ").upper()
+        nse = Nse()
+        try:
+            nse.get_fno_lot_sizes()[stock_code]
+        except KeyError:
+            raise KeyError
+
+        no_days = int(input("Please enter number of days you want past data of (Min = 2, Max = 20) : "))
+        if no_days < 2 or no_days > 20:
+            raise ValueError
+
+        strike_price = int(input("Please enter strike price : "))
+
+        if strike_price not in [x['strikePrice'] for x in get_opt_chain_data_json(stock_code)['filtered']['data']]:
+            print("Data for this strike price is not available")
+            raise ValueError
+
+        while True:
+            opt_type = input("Please Enter Option Type (CE/PE/TOTAL) : ").upper()
+            if opt_type == 'CE' or opt_type == 'PE' or opt_type == "TOTAL":
                 break
-            print('Answer should be either Y(Yes) or N(No)')
+            else:
+                print('Please enter valid option type')
 
-        if flg == 'N':
-            return
+    except ValueError:
+        raise ValueError
+
+    open_interest_graphs(stock_code, no_days, strike_price, opt_type)
+
 
 def get_opt_chain_data_json(stock_code):
     if stock_code == "NIFTY" or stock_code == "NIFTYIT" or stock_code == "BANKNIFTY":
@@ -69,8 +170,7 @@ def opt_chain_analysis(stock_code, data_points):
     try:
         lot_size = nse.get_fno_lot_sizes()[stock_code]
     except KeyError:
-        print('Wrong stock symbol, or the stock is not traded as derivatives')
-        return
+        raise KeyError
 
     data_json = get_opt_chain_data_json(stock_code)
     ce_pe = data_json['filtered']['data']
@@ -94,15 +194,15 @@ def opt_chain_analysis(stock_code, data_points):
     pe_strk_dict = sorted(pe_strk_dict.items(), key=lambda item: item[1], reverse=True)
     max_pain_dict = sorted(max_pain_dict.items(), key=lambda item: item[1], reverse=True)
 
-    return ce_strk_dict, pe_strk_dict, max_pain_dict
+    return ce_strk_dict, pe_strk_dict, max_pain_dict, lot_size
+
 
 def put_call_ratio(stock_code):
     nse = Nse()
     try:
         nse.get_fno_lot_sizes()[stock_code]
     except KeyError:
-        print('Wrong stock symbol, or the stock is not traded as derivatives')
-        return
+        raise KeyError
 
     data_json = get_opt_chain_data_json(stock_code)
     call_data = data_json['filtered']['CE']
@@ -112,7 +212,7 @@ def put_call_ratio(stock_code):
 
 
 print("+++++++++++++++++ NSE STOCK ANALYSER ++++++++++++++++++++")
-options = ['Option Chain Analysis', 'Put/Call Ratio', 'Exit']
+options = ['Option Chain Analysis', 'Put/Call Ratio', 'Open Interest Graphs', 'Exit']
 while(True):
     for i in range(0, len(options)):
         print(f'{i+1} : {options[i]}')
@@ -132,6 +232,9 @@ while(True):
 
     if opt_id == 2:
         put_call_wrapper()
+
+    if opt_id == 3:
+        oi_graph_wrapper()
 
     if opt_id == len(options):
         print('Thank you for using the application')
