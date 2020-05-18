@@ -66,8 +66,8 @@ def oi_graph_wrapper():
         raise ValueError
 
     strike_price_list = [x['strikePrice'] for x in get_opt_chain_data_json(stock_code)['filtered']['data']]
-    strike_price = input(
-        f"Please enter strike price (Data is available from Rs.{strike_price_list[0]} to Rs.{strike_price_list[-1]}) : ")
+    strike_price = int(input(
+        f"Please enter strike price (Data is available from Rs.{strike_price_list[0]} to Rs.{strike_price_list[-1]}) : "))
 
     if strike_price not in strike_price_list:
         print("Data for this strike price is not available")
