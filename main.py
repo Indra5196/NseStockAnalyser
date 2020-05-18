@@ -1,4 +1,6 @@
-from NseStockAnalyser.option_chain_analysis import *
+from NseStockAnalyser.option_chain_analysis import opt_chain_wrapper
+from NseStockAnalyser.put_call_ratio import put_call_wrapper
+from NseStockAnalyser.open_interest_graphs import oi_graph_wrapper
 
 print("+++++++++++++++++ NSE STOCK ANALYSER ++++++++++++++++++++")
 options = ['Option Chain Analysis', 'Put/Call Ratio', 'Open Interest Graphs', 'Exit']
