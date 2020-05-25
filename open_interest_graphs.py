@@ -29,14 +29,16 @@ def open_interest_graphs(stock_code, no_days, strike_price, opt_type):
                                    end=end_date,
                                    option_type="CE",
                                    strike_price=strike_price,
-                                   expiry_date=expiry_date)
+                                   expiry_date=expiry_date,
+                                   index=index)
 
         stock_opt_pe = get_history(symbol=stock_code,
                                    start=start_date,
                                    end=end_date,
                                    option_type="PE",
                                    strike_price=strike_price,
-                                   expiry_date=expiry_date)
+                                   expiry_date=expiry_date,
+                                   index=index)
 
         x = list(dict(stock_opt_ce['Open Interest']).keys())
         a = list(dict(stock_opt_ce['Open Interest']).values())
