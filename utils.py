@@ -1,4 +1,4 @@
-import requests
+from NseStockAnalyser.imports import *
 
 
 def continuation_handler(original_fn):
@@ -28,8 +28,5 @@ def get_opt_chain_data_json(stock_code):
     else:
         deriv_type = "equities"
     url = "https://www.nseindia.com/api/option-chain-" + deriv_type + "?symbol=" + stock_code
-    headers = {
-        'User-Agent': 'Chrome/81.0.4044.138'
-    }
 
     return requests.get(url, headers=headers).json()

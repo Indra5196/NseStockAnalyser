@@ -1,4 +1,3 @@
-from NseStockAnalyser.imports import *
 from NseStockAnalyser.utils import *
 
 

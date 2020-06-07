@@ -1,5 +1,5 @@
+from NseStockAnalyser.imports import *
 from NseStockAnalyser.utils import *
-from nsetools import Nse
 
 
 def put_call_ratio(stock_code):
