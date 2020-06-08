@@ -8,9 +8,9 @@ def put_call_ratio(stock_code):
     nse.get_fno_lot_sizes()[stock_code]  # If stock code not present, it will cause exception. will be caught by
                                          # continuation_handler
 
-    data_json = get_opt_chain_data_json(stock_code)
-    call_data = data_json['filtered']['CE']
-    put_data = data_json['filtered']['PE']
+    data_json = requests.get(get_opt_chain_url(stock_code), headers=headers).json()['filtered']
+    call_data = data_json['CE']
+    put_data = data_json['PE']
 
     return round(put_data['totOI'] / call_data['totOI'], 2), round(put_data['totVol'] / call_data['totVol'], 2)
 

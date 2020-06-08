@@ -27,8 +27,7 @@ def opt_chain_analysis(stock_code, data_points):
 
     lot_size = nse.get_fno_lot_sizes()[stock_code]
 
-    data_json = get_opt_chain_data_json(stock_code)
-    ce_pe = data_json['filtered']['data']
+    ce_pe, exp_date = get_opt_chain_data_json(stock_code)
 
     ce_strk_dict, pe_strk_dict, max_pain_dict = {}, {}, {}
 
@@ -48,5 +47,7 @@ def opt_chain_analysis(stock_code, data_points):
     ce_strk_dict = sorted(ce_strk_dict.items(), key=lambda item: item[1], reverse=True)
     pe_strk_dict = sorted(pe_strk_dict.items(), key=lambda item: item[1], reverse=True)
     max_pain_dict = sorted(max_pain_dict.items(), key=lambda item: item[1], reverse=True)
+
+    print(f'========OPTION CHAIN ANALYSIS DATA FOR {stock_code.upper()} FOR EXPIRY {exp_date.upper()}========')
 
     return ce_strk_dict, pe_strk_dict, max_pain_dict, lot_size
