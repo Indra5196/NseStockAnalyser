@@ -52,7 +52,7 @@ def open_interest_graphs(stock_code, no_days, strike_price, opt_type):
     plt.xlabel('Date')
     plt.ylabel('Open Interest')
 
-    plt.title(f'{opt_type} Open Interest variation at strike price of Rs.{strike_price} in the past {no_days} days\n')
+    plt.title(f'{opt_type} Open Interest variation at strike price of Rs.{strike_price} in the past {no_days} days for expiry {expiry_date}\n')
     plt.show()
 
 
