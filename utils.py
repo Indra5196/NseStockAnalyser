@@ -22,12 +22,14 @@ def continuation_handler(original_fn):
     return wrapper_fn
 
 
-def get_opt_chain_url(stock_code):
+def get_raw_json_data(stock_code):
     if stock_code == "NIFTY" or stock_code == "NIFTYIT" or stock_code == "BANKNIFTY":
         deriv_type = "indices"
     else:
         deriv_type = "equities"
-    return "https://www.nseindia.com/api/option-chain-" + deriv_type + "?symbol=" + stock_code
+
+    url = "https://www.nseindia.com/api/option-chain-" + deriv_type + "?symbol=" + stock_code
+    return requests.get(url, headers=headers).json()
 
 
 def get_expiry_date(all_exp_dates):
@@ -69,7 +71,7 @@ def get_expiry_date(all_exp_dates):
 
 
 def get_opt_chain_data_json(stock_code):
-    data_json = requests.get(get_opt_chain_url(stock_code), headers=headers).json()
+    data_json = get_raw_json_data(stock_code)
     data_records = data_json['records']['data']
     exp_date = get_expiry_date(data_json['records']['expiryDates'])
 

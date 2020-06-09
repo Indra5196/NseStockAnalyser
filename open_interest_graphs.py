@@ -8,8 +8,8 @@ def open_interest_graphs(stock_code, no_days, strike_price, opt_type):
 
     end_date = date.today()
     start_date = end_date - timedelta(days=no_days)
-    expiry_date = datetime.strptime(get_expiry_date(requests.get(get_opt_chain_url(stock_code), headers=headers).json()
-                                                    ['records']['expiryDates']), '%d-%b-%Y').date()
+    expiry_date = datetime.strptime(get_expiry_date(get_raw_json_data(stock_code)['records']['expiryDates']),
+                                    '%d-%b-%Y').date()
 
     if opt_type == "CE" or opt_type == "PE":
         stock_opt = get_history(symbol=stock_code,
@@ -67,7 +67,7 @@ def oi_graph_wrapper():
     if no_days < 2 or no_days > 20:
         raise ValueError
 
-    strike_price_list = requests.get(get_opt_chain_url(stock_code), headers=headers).json()['records']['strikePrices']
+    strike_price_list = get_raw_json_data(stock_code)['records']['strikePrices']
     strike_price = int(input(
         f"Please enter strike price (Data is available from Rs.{strike_price_list[0]} to Rs.{strike_price_list[-1]}) : "))
 
