@@ -22,6 +22,47 @@ def continuation_handler(original_fn):
     return wrapper_fn
 
 
+def get_all_index_names():
+    return requests.get(NSE_INDICES_URL, headers=headers).json()
+
+
+def get_index():
+    index_lists_json = get_all_index_names()
+    index_type_list = list(index_lists_json.keys())
+    index_type_list_len = len(index_type_list)
+    while True:
+        for i in range(0, index_type_list_len):
+            print(f'{i+1} : {index_type_list[i]}')
+
+        try:
+            index_type = int(input(f'Please enter Index Type (Input Range 1 - {index_type_list_len}): '))
+            if not 1 <= index_type <= index_type_list_len:
+                raise ValueError
+        except ValueError:
+            print("Please Enter Valid Input")
+
+        while True:
+            indices = index_lists_json[index_type_list[index_type - 1]]
+            indices_len = len(indices)
+            for i in range(0, indices_len):
+                print(f'{i + 1} : {indices[i]}')
+
+            try:
+                index = int(input(f'Please enter Index (Input Range 1 - {indices_len}): '))
+                if not 1 <= index <= indices_len:
+                    raise ValueError
+            except ValueError:
+                print("Please Enter Valid Input")
+
+            return indices[index - 1]
+
+
+def get_index_stock_data_json(index):
+    url_enc_str = urllib.parse.quote(index)
+    url = 'https://www.nseindia.com/api/equity-stockIndices?index=' + url_enc_str
+    return requests.get(url, headers=headers).json()
+
+
 def get_raw_json_data(stock_code):
     if stock_code == "NIFTY" or stock_code == "NIFTYIT" or stock_code == "BANKNIFTY":
         deriv_type = "indices"

@@ -1,20 +1,20 @@
-from NseStockAnalyser.imports import *
-
-# This link provides data regarding all stocks under NIFTY 50 Index
-NIFTY50_DATA_URL = 'https://www.nseindia.com/api/equity-stockIndices?index=NIFTY%2050'
+from NseStockAnalyser.utils import *
+from pprint import pprint
 
 
-def nifty_52_wk_lows():
+def index_52_wk_lows():
+
+    index = get_index()
+    # slicing off 1st index of the data list since it contains index data
+    nifty50_stocks_data_json = get_index_stock_data_json(index)['data'][1:]
+
     try:
-        data_pts = int(input('Enter number of data points (Input Range : 1 - 50): '))
-        if not 1 <= data_pts <= 50:
+        data_pts = int(input(f'Enter number of data points (Input Range : 1 - {len(nifty50_stocks_data_json)}): '))
+        if not 1 <= data_pts <= len(nifty50_stocks_data_json):
             raise ValueError
     except ValueError:
         print('Please enter a valid input')
         return
-
-    # slicing off 1st index of the data list since it contains nifty 50 index data
-    nifty50_stocks_data_json = requests.get(NIFTY50_DATA_URL, headers=headers).json()['data'][1:]
 
     stocks_list = []
     for stocks in nifty50_stocks_data_json:
