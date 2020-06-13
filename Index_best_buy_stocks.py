@@ -52,7 +52,7 @@ def index_52_wk_lows():
     if opt == 1:
         stocks_list = sorted(stocks_list, key=lambda i: i['percent_above_low'])
     elif opt == 2:
-        stocks_list = sorted(stocks_list, key=lambda i: i['percent_below_high'])
+        stocks_list = sorted(stocks_list, key=lambda i: i['percent_below_high'], reverse=True)
     elif opt == 3:
         stocks_list = sorted(stocks_list, key=lambda i: i['best_buy_index'], reverse=True)
 
