@@ -18,9 +18,13 @@ def index_52_wk_lows():
 
     stocks_list = []
     for stocks in nifty50_stocks_data_json:
-        code = stocks['meta']['symbol']
-        cur_price = stocks['lastPrice']
-        yr_low = stocks['yearLow']
+        try:
+            code = stocks['meta']['symbol']
+        except KeyError:
+            code = stocks['symbol']
+
+        cur_price = float(stocks['lastPrice'])
+        yr_low = float(stocks['yearLow'])
         price_diff_from_low = round(cur_price - yr_low, 2)
         percent_above_low = round((price_diff_from_low / yr_low) * 100, 2)
         stocks_list.append({'code': code, 'cur_price': cur_price, 'yr_low': yr_low,

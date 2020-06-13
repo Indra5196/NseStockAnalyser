@@ -58,7 +58,7 @@ def get_index():
 
 
 def get_index_stock_data_json(index):
-    url_enc_str = urllib.parse.quote(index)
+    url_enc_str = urllib.parse.quote(index.upper())
     url = 'https://www.nseindia.com/api/equity-stockIndices?index=' + url_enc_str
     return requests.get(url, headers=headers).json()
 
