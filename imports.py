@@ -16,5 +16,5 @@ import urllib.parse
 headers = {
     'User-Agent': 'Chrome/81.0.4044.138'
 }
-
+pd.set_option("display.max_rows", None, "display.max_columns", None)
 NSE_INDICES_URL = "https://www.nseindia.com/api/equity-master"
