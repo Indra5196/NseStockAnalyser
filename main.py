@@ -1,7 +1,7 @@
 from NseStockAnalyser.option_chain_analysis import opt_chain_wrapper
 from NseStockAnalyser.put_call_ratio import put_call_wrapper
 from NseStockAnalyser.open_interest_graphs import oi_graph_wrapper
-from NseStockAnalyser.index_52_wk_lows import index_52_wk_lows
+from NseStockAnalyser.Index_best_buy_stocks import index_52_wk_lows
 
 print("+++++++++++++++++ NSE STOCK ANALYSER ++++++++++++++++++++")
 options = ['Option Chain Analysis', 'Put/Call Ratio', 'Open Interest Graphs', 'Index stocks near 52 week low', 'Exit']
